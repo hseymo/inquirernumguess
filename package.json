@@ -1,0 +1,23 @@
+{
+  "name": "inquirernumguess",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hseymo/inquirernumguess.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/hseymo/inquirernumguess/issues"
+  },
+  "homepage": "https://github.com/hseymo/inquirernumguess#readme",
+  "dependencies": {
+    "inquirer": "^9.1.1"
+  }
+}
