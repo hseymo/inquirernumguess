@@ -49,6 +49,40 @@ function removeCard(array, num) {
     return array = array.splice(index, 1);
 }
 
+const compareCards = async (compChoice, userChoice) => {
+    try {
+        //determine winner and add points 
+        let winner;
+        if (compChoice > userChoice){
+                computer.addWinPoint();
+                user.addLossPoint();
+                winner = computer;
+            } else if (userChoice > compChoice){
+                user.addWinPoint();
+                computer.addLossPoint();
+                winner = user;
+            } else {
+                user.addTiePoint();
+                computer.addTiePoint();
+                winner = null;
+        }
+        // determine display text
+        let winnerName; 
+        if (winner == user){
+            winnerName = user.name
+        } else if (winner == computer) {
+            winnerName = computer.name
+        } else {
+            winnerName = "~It's a tie!"
+        }
+        console.log(`You chose ${userChoice} and computer chose ${compChoice}. Winner this round is ${winnerName}.`)
+        return winnerName;
+
+    } catch (err) {
+        console.log(err)
+    }
+}
+
 function compareStats(playerA, playerB) {
     let winner;
     if (playerA.pointsWon > playerB.pointsWon){
@@ -74,8 +108,8 @@ const startGame = async () => {
                 message: 'What is your name?'
             }
         ])
-
-        user.name = nameAns;
+        
+        user.name = nameAns.name;
 
         console.log(`Hello, ${nameAns}. Let me tell you about my game. You will be playing against the computer. You will each be given 10 cards between 0 (non-inclusive) and 20 (inclusive). Each round you will get to choose which card you want to play. To win a point, your card must be higher than the computer's choice! Following the round, the card you played will be removed from your hand (and so will the computer's). At the end of the game, the winner will be displayed! And luck is in your favor - should it be a tie, you will gain the W. So, let's get started!`)
 
@@ -92,7 +126,7 @@ const continueEnd = async (winner) => {
             cardSelection();
         } else {
             let winner = compareStats(user, computer);
-            console.log(`Gameover! Thanks for playing. The winner is ${winner}!`);
+            console.log(`Gameover! Thanks for playing. The winner is ${winner.name}!`);
 
             const playagain = await inquirer.prompt([
                 {
@@ -129,7 +163,10 @@ const cardSelection = async () => {
 
         let compChoice = randomCompSelection();
         let userChoice = userSelection.cardSelection;
-        compareCards(compChoice, userChoice)
+        const winner = await compareCards(compChoice, userChoice);
+        removeCard(userDeck, userChoice);
+        removeCard(compDeck, compChoice);
+        continueEnd(winner);
 
     } catch (err) {
         console.log(err)
@@ -137,42 +174,6 @@ const cardSelection = async () => {
 
 }
 
-const compareCards = async (compChoice, userChoice) => {
-    try {
-        let winner;
-        if (compChoice > userChoice){
-                computer.addWinPoint();
-                user.addLossPoint();
-                winner = computer;
-            } else if (userChoice > compChoice){
-                user.addWinPoint();
-                computer.addLossPoint();
-                winner = user;
-            } else {
-                user.addTiePoint();
-                computer.addTiePoint();
-                winner = null;
-        }
-        let winnerText; 
-        if (winner == user){
-            winnerText = user.name
-        } else if (winner == computer) {
-            winnerText = computer.name
-        } else {
-            winnerText = "~It's a tie!"
-        }
-
-        removeCard(userDeck, userChoice)
-        removeCard(compDeck, compChoice)
-
-        console.log(`You chose ${userChoice} and computer chose ${compChoice}. Winner this round is ${winnerText}.`)
-
-        continueEnd(winnerText);
-
-    } catch (err) {
-        console.log(err)
-    }
-}
 
 function reset() {
     user.pointsWon = 0;
