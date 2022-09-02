@@ -107,6 +107,19 @@ function compareCards(compChoice, userChoice){
         removeCard(userDeck, userChoice)
         removeCard(compDeck, compChoice)
 
+        if (userDeck.length >0) {
+            cardSelection();
+        } else {
+            let winner = compareStats(user, computer);
+            console.log(winner);
+            inquirer.prompt([
+                {
+                    name: 'gameover',
+                    message: `Gameover! Thanks for playing. The winner is ${winner.name}!`
+                }
+            ]).then((res)=> {})
+        }
+
     })
 }
 
@@ -117,4 +130,17 @@ function removeCard(array, num) {
     // current set up allows for duplicates 
     // userDeck = userDeck.filter((num) => num != userChoice);
     // compDeck = compDeck.filter((num) => num != compChoice);
+}
+
+function compareStats(playerA, playerB) {
+    let winner;
+    if (playerA.wins > playerB.wins){
+        winner = playerA;
+    } else if (playerB.wins > playerA.wins){
+        winner = playerB;
+    } else {
+        // default winner to user for now
+        winner = playerA;
+    };
+    return winner;
 }
