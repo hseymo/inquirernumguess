@@ -3,6 +3,8 @@ const fs = import('fs')
 
 let compDeck = [];
 let userDeck = [];
+let user;
+let computer;
 
 startGame();
 
@@ -17,8 +19,8 @@ function startGame() {
     }
 ]).then(({name}) => {
     
-    var user = new Player(name);
-    var computer = new Player('Computer');
+    user = new Player(name);
+    computer = new Player('Computer');
     console.log(user);
     inquirer.prompt([
         {
@@ -101,7 +103,18 @@ function compareCards(compChoice, userChoice){
             user.addTie();
             computer.addTie();
         }
-        console.log(user);
-        console.log(computer)
+
+        removeCard(userDeck, userChoice)
+        removeCard(compDeck, compChoice)
+
     })
+}
+
+function removeCard(array, num) {
+    let index = array.indexOf(num);
+    return array = array.splice(index, 1);
+
+    // current set up allows for duplicates 
+    // userDeck = userDeck.filter((num) => num != userChoice);
+    // compDeck = compDeck.filter((num) => num != compChoice);
 }
