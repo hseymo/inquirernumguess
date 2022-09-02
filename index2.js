@@ -86,6 +86,34 @@ const startGame = async () => {
     }
 } 
 
+const continueEnd = async (winner) => {
+    try {
+        if (userDeck.length >0) {
+            cardSelection();
+        } else {
+            let winner = compareStats(user, computer);
+            console.log(`Gameover! Thanks for playing. The winner is ${winner}!`);
+
+            const playagain = await inquirer.prompt([
+                {
+                    type: 'list',
+                    name: 'playagain',
+                    message: 'Would you like to play again?',
+                    choices: ['Yes', 'No']
+                }
+            ])
+
+            if (playagain == 'No') {
+                console.log('Goodbye!')
+            } else {
+                reset();
+            }
+        }
+        } catch (err) {
+        console.log(err)
+    }
+}
+
 const cardSelection = async () => {
     try {
         console.log(`Your cards are ${userDeck}.`)
@@ -111,20 +139,19 @@ const cardSelection = async () => {
 
 const compareCards = async (compChoice, userChoice) => {
     try {
-        let winner = await function() {
-            if (compChoice > userChoice){
+        let winner;
+        if (compChoice > userChoice){
                 computer.addWinPoint();
                 user.addLossPoint();
-                return computer;
+                winner = computer;
             } else if (userChoice > compChoice){
                 user.addWinPoint();
                 computer.addLossPoint();
-                return user;
+                winner = user;
             } else {
                 user.addTiePoint();
                 computer.addTiePoint();
-                return null;
-            }
+                winner = null;
         }
         let winnerText; 
         if (winner == user){
@@ -132,7 +159,6 @@ const compareCards = async (compChoice, userChoice) => {
         } else if (winner == computer) {
             winnerText = computer.name
         } else {
-            // triggering here
             winnerText = "~It's a tie!"
         }
 
@@ -141,35 +167,9 @@ const compareCards = async (compChoice, userChoice) => {
 
         console.log(`You chose ${userChoice} and computer chose ${compChoice}. Winner this round is ${winnerText}.`)
 
+        continueEnd(winnerText);
+
     } catch (err) {
-        console.log(err)
-    }
-}
-
-const continueEnd = async () => {
-    try {
-        if (userDeck.length >0) {
-            cardSelection();
-        } else {
-            let winner = compareStats(user, computer);
-            console.log(`Gameover! Thanks for playing. The winner is ${winner.name}!`);
-
-            const playagain = await inquirer.prompt([
-                {
-                    type: 'list',
-                    name: 'playagain',
-                    message: 'Would you like to play again?',
-                    choices: ['Yes', 'No']
-                }
-            ])
-
-            if (playagain == 'No') {
-                console.log('Goodbye!')
-            } else {
-                reset();
-            }
-        }
-        } catch (err) {
         console.log(err)
     }
 }
