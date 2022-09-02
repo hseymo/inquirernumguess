@@ -1,10 +1,10 @@
 import inquirer from 'inquirer';
-const fs = import('fs')
+// const fs = import('fs')
 
 let compDeck = [];
 let userDeck = [];
-let user;
-let computer;
+let user = new Player();
+let computer = new Player('Computer');
 
 startGame();
 
@@ -18,22 +18,17 @@ function startGame() {
         message: 'What is your name?'
     }
 ]).then(({name}) => {
-    
-    user = new Player(name);
-    computer = new Player('Computer');
-    console.log(user);
-    inquirer.prompt([
-        {
-            name: 'welcome',
-            message: `Hello, ${name}. Your numbers are ${userDeck}. Please press enter to contine.`
-        }
-    ]).then(()=>{
-        cardSelection();
-    })
+
+    user.name = name;
+
+    console.log(`Hello, ${name}. Let me tell you about my game. You will be playing against the computer. You will each be given 10 cards between 0 (non-inclusive) and 20 (inclusive). Each round you will get to choose which card you want to play. To win a point, your card must be higher than the computer's choice! Following the round, the card you played will be removed from your hand (and so will the computer's). At the end of the game, the winner will be displayed! And luck is in your favor - should it be a tie, you will gain the W. So, let's get started!`)
+
+    cardSelection();
 })
 }
 
 function cardSelection() {
+    console.log(`Your cards are ${userDeck}.`)
     inquirer.prompt([
         {
             name: 'cardSelection',
@@ -57,8 +52,6 @@ function generateCards() {
             userDeck.push(random)
         }
     }
-    // console.log(`Comp deck is ${compDeck}`)
-    // console.log(`User deck is ${userDeck}`)
     }
 
 function randomCompSelection(){
@@ -67,60 +60,85 @@ function randomCompSelection(){
 
 function Player(input){
     this.name = input,
-    this.currentPoints = 0,
     this.wins = 0,
-    this.losses = 0,
-    this.ties = 0
+    this.pointsWon = 0,
+    this.pointsLost = 0,
+    this.pointsTied = 0
+}
+
+Player.prototype.addWinPoint = function(){
+    this.pointsWon++;
+}
+
+Player.prototype.addLossPoint = function(){
+    this.pointsLost++;
+}
+
+Player.prototype.addTiePoint = function(){
+    this.pointsTied++;
 }
 
 Player.prototype.addWin = function(){
     this.wins++;
 }
 
-Player.prototype.addLoss = function(){
-    this.losses++;
-}
-
-Player.prototype.addTie = function(){
-    this.ties++;
-}
-
 function compareCards(compChoice, userChoice){
-    inquirer.prompt([
-        {
-            name: 'computer choice',
-            message: `You chose ${userChoice} and computer chose ${compChoice}.`
-        }
-    ]).then(()=>{
-        console.log(compChoice)
-        if (compChoice > userChoice){
-            computer.addWin();
-            user.addLoss();
-        } else if (userChoice > compChoice){
-            user.addWin();
-            computer.addLoss();
-        } else {
-            user.addTie();
-            computer.addTie();
-        }
+    let winner;
+    if (compChoice > userChoice){
+        computer.addWinPoint();
+        user.addLossPoint();
+        winner = computer;
+    } else if (userChoice > compChoice){
+        user.addWinPoint();
+        computer.addLossPoint();
+        winner = user;
+    } else {
+        user.addTiePoint();
+        computer.addTiePoint();
+        winner = null;
+    }
 
-        removeCard(userDeck, userChoice)
-        removeCard(compDeck, compChoice)
+    if (winner == user){
+        winner = user.name
+    } else if (winner == computer) {
+        winner = computer.name
+    } else {
+        winner = "~It's a tie!"
+    }
+
+    removeCard(userDeck, userChoice)
+    removeCard(compDeck, compChoice)
+
+    console.log(`You chose ${userChoice} and computer chose ${compChoice}. Winner this round is ${winner}.`)
 
         if (userDeck.length >0) {
             cardSelection();
         } else {
             let winner = compareStats(user, computer);
-            console.log(winner);
+            console.log(`Gameover! Thanks for playing. The winner is ${winner.name}!`);
             inquirer.prompt([
                 {
-                    name: 'gameover',
-                    message: `Gameover! Thanks for playing. The winner is ${winner.name}!`
+                    type: 'list',
+                    name: 'playagain',
+                    message: 'Would you like to play again?',
+                    choices: ['Yes', 'No']
                 }
-            ]).then((res)=> {})
+            ]).then(({playagain})=> {
+                if (playagain == 'No'){
+                    console.log('Goodbye!')
+                } else {
+                    user.pointsWon = 0;
+                    user.pointsLost = 0;
+                    user.pointsTied = 0;
+                    computer.pointsWon = 0;
+                    computer.pointsLost = 0;
+                    computer.pointsTied = 0;
+                    console.log(user)
+                    generateCards();
+                    cardSelection();
+                }
+            })
         }
-
-    })
 }
 
 function removeCard(array, num) {
@@ -134,13 +152,15 @@ function removeCard(array, num) {
 
 function compareStats(playerA, playerB) {
     let winner;
-    if (playerA.wins > playerB.wins){
+    if (playerA.pointsWon > playerB.pointsWon){
         winner = playerA;
-    } else if (playerB.wins > playerA.wins){
+    } else if (playerB.pointsWon > playerA.pointsWon){
         winner = playerB;
     } else {
         // default winner to user for now
         winner = playerA;
     };
+
+    winner.addWin();
     return winner;
 }
